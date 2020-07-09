@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +21,9 @@ Route::get('/', function () {
 
 
 Route::group(['prefix' => 'api'], function () {
-    Route::get('/products', [ProductController::class, 'indexApi'])->name('product.indexApi');;
+    Route::get('/products', [ProductController::class, 'indexApi'])->name('product.indexApi');
+    Route::post('/cart/add', [CartController::class, 'addApi'])->name('cart.addApi');
+    Route::post('/cart/del', [CartController::class, 'delApi'])->name('cart.delApi');
 });
 
 /**
