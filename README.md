@@ -25,3 +25,25 @@ Refresh migrations:
 ```
 php artisan migrate:refresh
 ```
+
+
+
+GET https://THIS_SITE/api/products - возвращает список товаров весь что есть (там я создал 4 тестовых)  
+POST https://THIS_SITE/api/cart/add - добавляет указанный товар и возвращает актуальную корзину  
+POST https://THIS_SITE/api/cart/del - удаляет указанный товар и возвращает актуальную корзину  
+  
+у последних двух одинаковое тело запроса:  
+```
+{
+   "userEmail":"test@email.com",
+   "product":{
+      "id":3,
+      "count":1
+   }
+}
+```
+добавляет указанный товар и возвращает актуальную корзину    
+POST http://THIS_SITE/api/cart/add/{itemId}/email/{email}  
+удаляет указанный товар и возвращает актуальную корзину  
+POST http://THIS_SITE/api/cart/del/{itemId}/email/{email}
+

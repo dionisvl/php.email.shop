@@ -8,18 +8,34 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    public function indexApi(string $email)
+    {
+        return Cart::where('email', $email)->first();
+    }
+
+    function addOneApi(int $itemId, string $email)
+    {
+        return $this->addOne($itemId, $email);
+    }
+
+    public function addApi(Request $request)
+    {
+        $content = json_decode($request->getContent(), true);
+        $email = $content['userEmail'];
+        $itemId = $content['product']['id'];
+
+        return $this->addOne($itemId, $email);
+    }
+
     /**
      * add one item to cart
      * and return actual cart
      * @param Request $request
      * @return mixed
      */
-    public function addApi(Request $request)
+    private function addOne(int $itemId, string $email)
     {
-        $content = json_decode($request->getContent(), true);
-        $email = $content['userEmail'];
-        $productId = $content['product']['id'];
-        $product = Product::where('id', $productId)->first()->toArray();
+        $product = Product::where('id', $itemId)->first()->toArray();
 
         $cart = $this->indexApi($email);
         if (empty($cart)) {
@@ -63,17 +79,22 @@ class CartController extends Controller
         return $cart;
     }
 
-    public function indexApi(string $email)
-    {
-        return Cart::where('email', $email)->first();
-    }
-
     public function delApi(Request $request)
     {
         $content = json_decode($request->getContent(), true);
         $email = $content['userEmail'];
-        $productId = $content['product']['id'];
-        $product = Product::where('id', $productId)->first()->toArray();
+        $itemId = $content['product']['id'];
+        return $this->delOne($itemId, $email);
+    }
+
+    public function delOneApi(int $itemId, string $email)
+    {
+        return $this->delOne($itemId, $email);
+    }
+
+    private function delOne(int $itemId, string $email)
+    {
+        $product = Product::where('id', $itemId)->first()->toArray();
 
         $cart = $this->indexApi($email);
         if (empty($cart)) {

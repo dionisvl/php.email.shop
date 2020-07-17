@@ -19,11 +19,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/hi', function () {
+    echo 'hello';
+});
+
 
 Route::group(['prefix' => 'api'], function () {
     Route::get('/products', [ProductController::class, 'indexApi'])->name('product.indexApi');
     Route::post('/cart/add', [CartController::class, 'addApi'])->name('cart.addApi');
     Route::post('/cart/del', [CartController::class, 'delApi'])->name('cart.delApi');
+
+    Route::post('/cart/add/{itemId}/email/{email}', [CartController::class, 'addOneApi'])->name('cart.addOneApi');
+    Route::post('/cart/del/{itemId}/email/{email}', [CartController::class, 'delOneApi'])->name('cart.delOneApi');
 });
 
 /**
