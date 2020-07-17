@@ -23,6 +23,7 @@ Route::get('/hi', function () {
     echo 'hello';
 });
 
+Route::get('/demo', [ProductController::class, 'demo'])->name('product.demo');
 
 Route::group(['prefix' => 'api'], function () {
     Route::get('/products', [ProductController::class, 'indexApi'])->name('product.indexApi');
@@ -32,6 +33,7 @@ Route::group(['prefix' => 'api'], function () {
     Route::post('/cart/add/{itemId}/email/{email}', [CartController::class, 'addOneApi'])->name('cart.addOneApi');
     Route::post('/cart/del/{itemId}/email/{email}', [CartController::class, 'delOneApi'])->name('cart.delOneApi');
 });
+
 
 /**
  * Verb             URI                     Action  Route Name
