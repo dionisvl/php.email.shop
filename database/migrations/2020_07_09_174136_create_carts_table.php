@@ -19,8 +19,8 @@ class CreateCartsTable extends Migration
             $table->string('slug');
             $table->string('email')->nullable();
             $table->integer('user_id')->nullable();
-            $table->integer('total_price')->nullable()->default(0);
-            $table->json('contents_json')->nullable();
+            $table->integer('totalPrice')->nullable()->default(0);
+            $table->json('items')->nullable();
             $table->integer('status')->nullable()->default(0);
             $table->date('status_date')->nullable();
             $table->timestamps();

@@ -27,6 +27,7 @@ Route::get('/demo', [ProductController::class, 'demo'])->name('product.demo');
 
 Route::group(['prefix' => 'api'], function () {
     Route::get('/products', [ProductController::class, 'indexApi'])->name('product.indexApi');
+    Route::get('/cart/get', [CartController::class, 'index'])->name('cart.index');//?email=test@test.ru required!
     Route::post('/cart/add', [CartController::class, 'addApi'])->name('cart.addApi');
     Route::post('/cart/del', [CartController::class, 'delApi'])->name('cart.delApi');
 

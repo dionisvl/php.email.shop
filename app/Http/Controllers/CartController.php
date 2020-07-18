@@ -5,9 +5,29 @@ namespace App\Http\Controllers;
 use App\Cart;
 use App\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class CartController extends Controller
 {
+    public function index(Request $request)
+    {
+        $email = $request->email;
+        if (empty($email)) {
+            return ['status' => 'error', 'message' => 'email (?email=test@test.ru) required!'];
+        } else {
+            $cart = $this->indexApi($email);
+            if (empty($cart)) {
+                $cart['items'] = '{}';
+            } else {
+                $cart = $cart->toArray();
+            }
+
+            $cart['status'] = 'ok';
+            $cart['items'] = $this->convertJsonToAMPArray($cart['items']);
+            return $cart;
+        }
+    }
+
     public function indexApi(string $email)
     {
         return Cart::where('email', $email)->first();
@@ -30,7 +50,8 @@ class CartController extends Controller
     /**
      * add one item to cart
      * and return actual cart
-     * @param Request $request
+     * @param int $itemId
+     * @param string $email
      * @return mixed
      */
     private function addOne(int $itemId, string $email)
@@ -43,40 +64,39 @@ class CartController extends Controller
             $cart->title = $email;
             $cart->slug = $email;
             $cart->email = $email;
-            $cart->total_price = $product['price'];
+            $cart->totalPrice = $product['price'];
             $contents[$product['slug']]['count'] = 1;
             $contents[$product['slug']]['data'] = $product;
-            $cart->contents_json = json_encode($contents);
+            $cart->items = json_encode($contents);
             $cart->save();
         } else {
-
-            $contents = $cart->contents_json;
+            $contents = $cart->items;
             $contents = json_decode($contents, 1);
-
-            if (array_key_exists($product['slug'], $contents)) {
+            $needProductSlug = $product['slug'];
+            if (empty($contents[$needProductSlug])) {
+                $contents[$product['slug']]['count'] = 1;
+                $contents[$product['slug']]['data'] = $product;
+                $cart->totalPrice += $product['price'];
+            } else {
                 $totalPrice = 0;
 
                 foreach ($contents as $key => $product) {
-
-                    if ($key == $product['data']['slug']) {
+                    if ($needProductSlug == $product['data']['slug']) {
                         $contents[$key]['count']++;
                     }
                     $totalPrice += $contents[$key]['count'] * $product['data']['price'];
                 }
-                $cart->total_price = $totalPrice;
-            } else {
-                $contents[$product['slug']]['count'] = 1;
-                $contents[$product['slug']]['data'] = $product;
-                $cart->total_price += $product['price'];
+                $cart->totalPrice = $totalPrice;
             }
 
-            $cart->contents_json = json_encode($contents);
+            $cart->items = json_encode($contents);
 
             $cart->save();
         }
 
         $cart = $this->indexApi($email)->toArray();
         $cart['status'] = 'ok';
+        $cart['items'] = $this->convertJsonToAMPArray($cart['items']);
         return $cart;
     }
 
@@ -101,14 +121,17 @@ class CartController extends Controller
         if (empty($cart)) {
             return ['status' => 'ok', 'message' => 'cart already empty'];
         } else {
-            $contents = $cart->contents_json;
+            $contents = $cart->items;
             $contents = json_decode($contents, 1);
 
             if (array_key_exists($product['slug'], $contents)) {
-                $cart->total_price = $cart->total_price - $contents[$product['slug']]['count'] * $product['price'];
+                $cart->totalPrice = $cart->totalPrice - $contents[$product['slug']]['count'] * $product['price'];
 
                 unset($contents[$product['slug']]);
-                $cart->contents_json = json_encode($contents);
+                $cart->items = json_encode($contents);
+                if (empty($contents)) {
+                    $cart->totalPrice = 0;
+                }
                 $cart->save();
                 //return ['status' => 'ok', 'message' => 'success removed'];
             } else {
@@ -118,6 +141,20 @@ class CartController extends Controller
 
         $cart = $this->indexApi($email)->toArray();
         $cart['status'] = 'ok';
+        $cart['items'] = $this->convertJsonToAMPArray($cart['items']);
         return $cart;
+    }
+
+    private function convertJsonToAMPArray($json): array
+    {
+        $arr = json_decode($json, 1);
+        $result = [];
+        foreach ($arr as $key => $item) {
+            $newItem = $item['data'];
+            $newItem['count'] = $item['count'];
+
+            $result[] = $newItem;
+        }
+        return $result;
     }
 }
